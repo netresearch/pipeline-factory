@@ -28,7 +28,7 @@ service container configuration:
 # config/services.yaml
 services:
     app.my.custom.pipeline:
-        factory: [ 'Netresearch\ExtendedPipelinesBundle\Pipeline\Factory', create ]
+        factory: [ 'Netresearch\PipelineFactoryBundle\Pipeline\Factory', create ]
         class: League\Pipeline\Pipeline
         arguments:
             $stages: !iterator [
@@ -51,13 +51,13 @@ services:
         tags: [ 'app.my.custom.pipeline.stage' ]
 
     app.my.custom.pipeline:
-        factory: [ 'Netresearch\ExtendedPipelinesBundle\Pipeline\Factory', create ]
+        factory: [ 'Netresearch\PipelineFactoryBundle\Pipeline\Factory', create ]
         class: League\Pipeline\Pipeline
         arguments:
             $stages: !tagged_iterator 'app.my.custom.pipeline.stage'
 ```
 
-Via [priority](https://symfony.com/doc/current/service_container/tags.html#tagged-services-with-priority) you can
+Via [priority](https://symfony.com/doc/current/service_container/tags.html#tagged-services-with-priority), you can
 control the order of the stages in this case.
 
 ## Development
