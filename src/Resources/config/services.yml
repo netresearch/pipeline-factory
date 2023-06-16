@@ -1,0 +1,4 @@
+services:
+    Netresearch\PipelineFactoryBundle\Pipeline\Factory:
+        class: Netresearch\PipelineFactoryBundle\Pipeline\Factory
+        public: true
