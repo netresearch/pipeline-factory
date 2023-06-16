@@ -15,7 +15,7 @@ If you do not use Symfony Flex, you need to enable the bundle manually:
 // config/bundles.php
 return [
     // ...
-    Netresearch\Bundle\PipelineFactoryBundle\NetresearchPipelineFactoryBundle::class => ['all' => true],
+    Netresearch\PipelineFactoryBundle\NetresearchPipelineFactoryBundle::class => ['all' => true],
 ];
 ```
 
