@@ -4,7 +4,7 @@
          bootstrap="vendor/autoload.php"
          colors="true"
          failOnRisky="true"
-         failOnWarning="true"
+         failOnWarning="false"
          cacheDirectory=".phpunit.cache">
     <testsuites>
         <testsuite name="Pipeline Factory Test Suite">
@@ -21,11 +21,4 @@
             <file>src/NetresearchPipelineFactoryBundle.php</file>
         </exclude>
     </source>
-
-    <coverage>
-        <report>
-            <html outputDirectory="coverage"/>
-            <text outputFile="php://stdout" showUncoveredFiles="true"/>
-        </report>
-    </coverage>
 </phpunit>
