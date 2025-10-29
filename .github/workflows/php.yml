@@ -63,7 +63,7 @@ jobs:
                 run: composer analysis
 
             -   name: Run test suite
-                run: composer test
+                run: vendor/bin/phpunit --no-coverage
 
     code-coverage:
         name: Code Coverage
