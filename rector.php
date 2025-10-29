@@ -14,36 +14,31 @@ use Rector\Doctrine\Set\DoctrineSetList;
 use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
-use Rector\Symfony\Set\SymfonyLevelSetList;
 use Rector\Symfony\Set\SymfonySetList;
 use Rector\Transform\Rector\Attribute\AttributeKeyToClassConstFetchRector;
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
+return RectorConfig::configure()
+    ->withPaths([
         __DIR__ . '/src'
-    ]);
-
-    $rectorConfig->sets([
+    ])
+    ->withSets([
         LevelSetList::UP_TO_PHP_82,
         SetList::CODE_QUALITY,
         SetList::EARLY_RETURN,
         SetList::TYPE_DECLARATION,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
         DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
-        SymfonyLevelSetList::UP_TO_SYMFONY_54,
+        SymfonySetList::SYMFONY_54,
         SymfonySetList::SYMFONY_CODE_QUALITY,
-    ]);
-    $rectorConfig->rules([
+    ])
+    ->withRules([
         RemoveUselessParamTagRector::class,
         RemoveUselessReturnTagRector::class,
         RemoveUselessVarTagRector::class
-    ]);
-
-    // The following rules are skipped due to conflicts
-    $rectorConfig->skip([
-        // "AnnotationToAttributeRector", which is part of "SymfonyLevelSetList::UP_TO_SYMFONY_54"
+    ])
+    ->withSkip([
+        // "AnnotationToAttributeRector", which is part of Symfony sets
         AnnotationToAttributeRector::class,
         // "AttributeKeyToClassConstFetchRector", which is part of "DoctrineSetList::DOCTRINE_CODE_QUALITY"
         AttributeKeyToClassConstFetchRector::class
     ]);
-};
