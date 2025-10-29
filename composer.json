@@ -35,17 +35,24 @@
         "phpstan/phpstan-symfony": "^2.0",
         "phpstan/extension-installer": "^1.2",
         "rector/rector": "*",
-        "squizlabs/php_codesniffer": "~3.11.0"
+        "squizlabs/php_codesniffer": "~3.11.0",
+        "phpunit/phpunit": "^10.0"
     },
     "scripts": {
         "phpcs": "phpcs --standard=PSR12 src",
         "phpcbf": "phpcbf --standard=PSR12 src",
         "rector": "rector",
         "phpstan": "phpstan analyze --level 7 -a vendor/autoload.php src",
+        "test": "phpunit",
+        "test-coverage": "phpunit --coverage-html coverage",
         "analysis": [
             "@phpcs",
             "@rector --dry-run --no-progress-bar",
             "@phpstan --no-progress"
+        ],
+        "quality": [
+            "@analysis",
+            "@test"
         ]
     },
     "config": {

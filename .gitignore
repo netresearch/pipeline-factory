@@ -4,3 +4,8 @@
 .idea
 .project
 .settings
+
+# PHPUnit
+.phpunit.cache/
+coverage/
+phpunit.xml

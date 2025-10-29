@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- PHPUnit 10.x test suite with comprehensive coverage
+- `composer test` command for running tests
+- `composer test-coverage` command for generating coverage reports
+- `composer quality` command for running all quality checks
+- CI/CD integration for automated test execution
+
 ### Fixed
 
 - Use current bundle name in README

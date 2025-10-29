@@ -62,6 +62,22 @@ control the order of the stages in this case.
 
 ## Development
 
+### Testing
+
+Run the test suite:
+
+```bash
+$ composer test
+```
+
+Generate code coverage report:
+
+```bash
+$ composer test-coverage
+```
+
+The coverage report will be available in the `coverage/` directory. Open `coverage/index.html` in your browser to view detailed coverage information.
+
 ### Code Style and Static Analysis
 
 Use the following commands to ensure the source code conforms to our **coding standards**
@@ -72,4 +88,10 @@ and guidelines:
   code, and perform migrations (rules defined in `./rector.php`)
 * `composer phpstan` for type and bug checking
 
-Run the command `composer analysis` to run all commands at once.
+Run the command `composer analysis` to run all static analysis checks at once.
+
+Run all quality checks (analysis + tests):
+
+```bash
+$ composer quality
+```
