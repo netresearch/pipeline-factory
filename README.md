@@ -3,6 +3,12 @@
 This bundle enables you to create [league/pipeline](https://github.com/thephpleague/pipeline) pipelines via service
 configuration.
 
+## Requirements
+
+- PHP 8.2 or higher
+- Symfony 5.x, 6.x, or 7.x
+- league/pipeline ^1.0
+
 ## Installation
 
 ```bash

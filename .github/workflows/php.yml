@@ -10,17 +10,33 @@ permissions:
     contents: read
 
 jobs:
-    build:
-
+    tests:
+        name: PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}
         runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ['8.2', '8.3', '8.4']
+                symfony: ['5.4.*', '6.4.*', '7.0.*']
+                include:
+                    # Test lowest dependencies on PHP 8.2 with Symfony 5.4
+                    -   php: '8.2'
+                        symfony: '5.4.*'
+                        composer-flags: '--prefer-lowest'
+                    # Test latest dependencies on PHP 8.4 with Symfony 7.0
+                    -   php: '8.4'
+                        symfony: '7.0.*'
+                        composer-flags: '--prefer-stable'
 
         steps:
             -   uses: actions/checkout@v4
 
-            -   name: Setup PHP
+            -   name: Setup PHP ${{ matrix.php }}
                 uses: shivammathur/setup-php@v2
                 with:
-                    php-version: 8.2
+                    php-version: ${{ matrix.php }}
+                    coverage: none
 
             -   name: Validate composer.json and composer.lock
                 run: composer validate --strict
@@ -30,15 +46,43 @@ jobs:
                 uses: actions/cache@v4
                 with:
                     path: vendor
-                    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-${{ hashFiles('**/composer.lock') }}
                     restore-keys: |
-                        ${{ runner.os }}-php-
+                        ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-
+                        ${{ runner.os }}-php-${{ matrix.php }}-
+
+            -   name: Install Symfony Flex
+                run: composer global config --no-plugins allow-plugins.symfony/flex true && composer global require --no-progress --no-scripts --no-plugins symfony/flex
 
             -   name: Install dependencies
-                run: composer install --prefer-dist --no-progress
+                env:
+                    SYMFONY_REQUIRE: ${{ matrix.symfony }}
+                run: composer update --prefer-dist --no-progress ${{ matrix.composer-flags || '' }}
 
             -   name: Run static analysis
                 run: composer analysis
 
             -   name: Run test suite
                 run: composer test
+
+    code-coverage:
+        name: Code Coverage
+        runs-on: ubuntu-latest
+
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: 8.3
+                    coverage: xdebug
+
+            -   name: Install dependencies
+                run: composer install --prefer-dist --no-progress
+
+            -   name: Run test suite with coverage
+                run: composer test-coverage
+
+            -   name: Check coverage directory exists
+                run: ls -la coverage/
