@@ -135,9 +135,7 @@ class FactoryTest extends TestCase
     }
 
     /**
-     * Test that empty stages array is handled
-     * NOTE: Current implementation does not validate empty stages
-     * This test documents current behavior
+     * Test that empty stages array creates valid pipeline
      */
     public function testCreateWithEmptyStages(): void
     {
@@ -149,6 +147,69 @@ class FactoryTest extends TestCase
         // Empty pipeline returns input unchanged
         $result = $pipeline->process('test');
         $this->assertSame('test', $result);
+    }
+
+    /**
+     * Test that invalid stage type throws exception with clear message
+     */
+    public function testCreateWithInvalidStageTypeThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches(
+            '/Stage at position 0 must implement .+StageInterface, got string/'
+        );
+
+        $stages = ['invalid-stage'];
+        Factory::create($stages, null);
+    }
+
+    /**
+     * Test that invalid stage type at specific position is reported correctly
+     */
+    public function testCreateWithInvalidStageAtPositionThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches(
+            '/Stage at position 1 must implement .+StageInterface, got stdClass/'
+        );
+
+        $validStage = $this->createMock(StageInterface::class);
+        $invalidStage = new \stdClass();
+
+        $stages = [$validStage, $invalidStage];
+        Factory::create($stages, null);
+    }
+
+    /**
+     * Test that invalid stage type shows correct type in error message
+     */
+    public function testCreateWithNullStageThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches(
+            '/Stage at position 0 must implement .+StageInterface, got null/'
+        );
+
+        $stages = [null];
+        Factory::create($stages, null);
+    }
+
+    /**
+     * Test that mixed valid and invalid stages are detected
+     */
+    public function testCreateWithMixedValidAndInvalidStages(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches(
+            '/Stage at position 2 must implement .+StageInterface, got array/'
+        );
+
+        $stage1 = $this->createMock(StageInterface::class);
+        $stage2 = $this->createMock(StageInterface::class);
+        $invalidStage = ['not', 'a', 'stage'];
+
+        $stages = [$stage1, $stage2, $invalidStage];
+        Factory::create($stages, null);
     }
 
     /**
