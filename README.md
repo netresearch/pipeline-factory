@@ -6,7 +6,7 @@ configuration.
 ## Requirements
 
 - PHP 8.2 or higher
-- Symfony 5.x, 6.x, or 7.x
+- Symfony 5.x, 6.x, 7.x, or 8.x
 - league/pipeline ^1.0
 
 ## Installation
