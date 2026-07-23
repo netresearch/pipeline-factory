@@ -9,18 +9,25 @@ on:
 permissions: {}
 
 jobs:
-    # One caller job per supported Symfony major. The shared `php-ci.yml`
-    # matrices over PHP only, so the Symfony dimension is expressed as
-    # separate jobs that pin the three direct Symfony dependencies via
-    # `pre-install-cmd` before `composer install` resolves.
-    symfony-5-4:
-        name: Symfony 5.4
+    # The Symfony dimension is a matrix axis inside the shared reusable
+    # (`extra-matrix`), not one caller job per major. Each cell exports its
+    # value as MATRIX_SYMFONY, which `symfony-require` resolves at runtime.
+    #
+    # `symfony-require` installs symfony/flex and exports SYMFONY_REQUIRE, so
+    # the WHOLE Symfony stack is pinned to the cell's major, transitive
+    # symfony/* packages included. The previous `pre-install-cmd` pinned
+    # exactly the three direct dependencies by name: a fourth Symfony
+    # dependency added to composer.json later would have resolved to whatever
+    # version happened to fit, and the matrix would have kept claiming a
+    # coverage it no longer had.
+    symfony:
         uses: netresearch/.github/.github/workflows/php-ci.yml@main
         permissions:
             contents: read
         with:
             php-versions: '["8.2","8.3","8.4"]'
-            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:5.4.*" "symfony/config:5.4.*" "symfony/http-kernel:5.4.*"'
+            extra-matrix: '[{"symfony":"5.4.*"},{"symfony":"6.4.*"},{"symfony":"7.4.*"}]'
+            symfony-require: MATRIX_SYMFONY
             phpstan-cmd: composer phpstan
             phpunit-cmd: composer test
             run-cs-fixer: true
@@ -28,45 +35,19 @@ jobs:
             run-rector: true
             rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-    symfony-6-4:
-        name: Symfony 6.4
-        uses: netresearch/.github/.github/workflows/php-ci.yml@main
-        permissions:
-            contents: read
-        with:
-            php-versions: '["8.2","8.3","8.4"]'
-            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:6.4.*" "symfony/config:6.4.*" "symfony/http-kernel:6.4.*"'
-            phpstan-cmd: composer phpstan
-            phpunit-cmd: composer test
-            run-cs-fixer: true
-            cs-fixer-cmd: composer phpcs
-            run-rector: true
-            rector-cmd: composer rector -- --dry-run --no-progress-bar
-
-    symfony-7-4:
-        name: Symfony 7.4
-        uses: netresearch/.github/.github/workflows/php-ci.yml@main
-        permissions:
-            contents: read
-        with:
-            php-versions: '["8.2","8.3","8.4"]'
-            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:7.4.*" "symfony/config:7.4.*" "symfony/http-kernel:7.4.*"'
-            phpstan-cmd: composer phpstan
-            phpunit-cmd: composer test
-            run-cs-fixer: true
-            cs-fixer-cmd: composer phpcs
-            run-rector: true
-            rector-cmd: composer rector -- --dry-run --no-progress-bar
-
-    # Symfony 8.0 requires PHP 8.4+, so this job carries no 8.2/8.3 entries.
-    symfony-8-0:
-        name: Symfony 8.0
+    # Symfony 8.0 requires PHP 8.4+, so it cannot join the matrix above: the
+    # 8.0 x PHP 8.2 and 8.0 x PHP 8.3 cells are unresolvable. That is a
+    # constraint of the dependency, not a local preference, so it stays a
+    # separate job until the reusable can express matrix exclusions
+    # (netresearch/.github#287).
+    symfony-8:
         uses: netresearch/.github/.github/workflows/php-ci.yml@main
         permissions:
             contents: read
         with:
             php-versions: '["8.4"]'
-            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:8.0.*" "symfony/config:8.0.*" "symfony/http-kernel:8.0.*"'
+            extra-matrix: '[{"symfony":"8.0.*"}]'
+            symfony-require: MATRIX_SYMFONY
             phpstan-cmd: composer phpstan
             phpunit-cmd: composer test
             run-cs-fixer: true
