@@ -6,89 +6,83 @@ on:
     pull_request:
         branches: [ "main" ]
 
-permissions:
-    contents: read
+permissions: {}
 
 jobs:
-    tests:
-        name: PHP ${{ matrix.php }} - Symfony ${{ matrix.symfony }}
-        runs-on: ubuntu-latest
+    # One caller job per supported Symfony major. The shared `php-ci.yml`
+    # matrices over PHP only, so the Symfony dimension is expressed as
+    # separate jobs that pin the three direct Symfony dependencies via
+    # `pre-install-cmd` before `composer install` resolves.
+    symfony-5-4:
+        name: Symfony 5.4
+        uses: netresearch/.github/.github/workflows/php-ci.yml@main
+        permissions:
+            contents: read
+        with:
+            php-versions: '["8.2","8.3","8.4"]'
+            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:5.4.*" "symfony/config:5.4.*" "symfony/http-kernel:5.4.*"'
+            phpstan-cmd: composer phpstan
+            phpunit-cmd: composer test
+            run-cs-fixer: true
+            cs-fixer-cmd: composer phpcs
+            run-rector: true
+            rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-        strategy:
-            fail-fast: false
-            matrix:
-                php: ['8.2', '8.3', '8.4']
-                symfony: ['5.4.*', '6.4.*', '7.4.*', '8.0.*']
-                exclude:
-                    # Symfony 8 requires PHP 8.4+
-                    -   php: '8.2'
-                        symfony: '8.0.*'
-                    -   php: '8.3'
-                        symfony: '8.0.*'
-                include:
-                    # Test lowest dependencies on PHP 8.2 with Symfony 5.4
-                    -   php: '8.2'
-                        symfony: '5.4.*'
-                        composer-flags: '--prefer-lowest'
-                    # Test latest dependencies on PHP 8.4 with Symfony 8.0
-                    -   php: '8.4'
-                        symfony: '8.0.*'
-                        composer-flags: '--prefer-stable'
+    symfony-6-4:
+        name: Symfony 6.4
+        uses: netresearch/.github/.github/workflows/php-ci.yml@main
+        permissions:
+            contents: read
+        with:
+            php-versions: '["8.2","8.3","8.4"]'
+            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:6.4.*" "symfony/config:6.4.*" "symfony/http-kernel:6.4.*"'
+            phpstan-cmd: composer phpstan
+            phpunit-cmd: composer test
+            run-cs-fixer: true
+            cs-fixer-cmd: composer phpcs
+            run-rector: true
+            rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-        steps:
-            -   uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+    symfony-7-4:
+        name: Symfony 7.4
+        uses: netresearch/.github/.github/workflows/php-ci.yml@main
+        permissions:
+            contents: read
+        with:
+            php-versions: '["8.2","8.3","8.4"]'
+            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:7.4.*" "symfony/config:7.4.*" "symfony/http-kernel:7.4.*"'
+            phpstan-cmd: composer phpstan
+            phpunit-cmd: composer test
+            run-cs-fixer: true
+            cs-fixer-cmd: composer phpcs
+            run-rector: true
+            rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-            -   name: Setup PHP ${{ matrix.php }}
-                uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
-                with:
-                    php-version: ${{ matrix.php }}
-                    coverage: none
+    # Symfony 8.0 requires PHP 8.4+, so this job carries no 8.2/8.3 entries.
+    symfony-8-0:
+        name: Symfony 8.0
+        uses: netresearch/.github/.github/workflows/php-ci.yml@main
+        permissions:
+            contents: read
+        with:
+            php-versions: '["8.4"]'
+            pre-install-cmd: 'composer require --no-update --no-progress "symfony/dependency-injection:8.0.*" "symfony/config:8.0.*" "symfony/http-kernel:8.0.*"'
+            phpstan-cmd: composer phpstan
+            phpunit-cmd: composer test
+            run-cs-fixer: true
+            cs-fixer-cmd: composer phpcs
+            run-rector: true
+            rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-            -   name: Validate composer.json and composer.lock
-                run: composer validate --strict
-
-            -   name: Cache Composer packages
-                id: composer-cache
-                uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-                with:
-                    path: vendor
-                    key: ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-${{ hashFiles('**/composer.lock') }}
-                    restore-keys: |
-                        ${{ runner.os }}-php-${{ matrix.php }}-symfony-${{ matrix.symfony }}-
-                        ${{ runner.os }}-php-${{ matrix.php }}-
-
-            -   name: Install Symfony Flex
-                run: composer global config --no-plugins allow-plugins.symfony/flex true && composer global require --no-progress --no-scripts --no-plugins symfony/flex
-
-            -   name: Install dependencies
-                env:
-                    SYMFONY_REQUIRE: ${{ matrix.symfony }}
-                run: composer update --prefer-dist --no-progress ${{ matrix.composer-flags || '' }}
-
-            -   name: Run static analysis
-                run: composer analysis
-
-            -   name: Run test suite
-                run: composer test
-
+    # Unpinned (highest resolvable Symfony for PHP 8.3) run with xdebug,
+    # producing the HTML/text report documented in the README.
     code-coverage:
         name: Code Coverage
-        runs-on: ubuntu-latest
-
-        steps:
-            -   uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-
-            -   name: Setup PHP
-                uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
-                with:
-                    php-version: 8.3
-                    coverage: xdebug
-
-            -   name: Install dependencies
-                run: composer install --prefer-dist --no-progress
-
-            -   name: Run test suite with coverage
-                run: composer test-coverage
-
-            -   name: Check coverage directory exists
-                run: ls -la coverage/
+        uses: netresearch/.github/.github/workflows/php-ci.yml@main
+        permissions:
+            contents: read
+        with:
+            php-versions: '["8.3"]'
+            coverage: xdebug
+            run-phpstan: false
+            phpunit-cmd: composer test-coverage
