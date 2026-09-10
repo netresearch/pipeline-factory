@@ -28,7 +28,6 @@ return RectorConfig::configure()
         SetList::TYPE_DECLARATION,
         DoctrineSetList::DOCTRINE_CODE_QUALITY,
         DoctrineSetList::ANNOTATIONS_TO_ATTRIBUTES,
-        SymfonySetList::SYMFONY_54,
         SymfonySetList::SYMFONY_CODE_QUALITY,
     ])
     ->withRules([
