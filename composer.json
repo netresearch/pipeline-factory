@@ -36,7 +36,7 @@
         "phpstan/extension-installer": "^1.2",
         "rector/rector": "^2.0",
         "squizlabs/php_codesniffer": "~4.0.0",
-        "phpunit/phpunit": "^11.0"
+        "phpunit/phpunit": "^13.0"
     },
     "scripts": {
         "phpcs": "phpcs --standard=PSR12 src",
