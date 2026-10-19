@@ -35,18 +35,23 @@ jobs:
             run-rector: true
             rector-cmd: composer rector -- --dry-run --no-progress-bar
 
-    # Symfony 8.0 requires PHP 8.4+, so it cannot join the matrix above: the
-    # 8.0 x PHP 8.2 and 8.0 x PHP 8.3 cells are unresolvable. That is a
+    # Symfony 8 requires PHP 8.4+, so it cannot join the matrix above: the
+    # 8.x x PHP 8.2 and 8.x x PHP 8.3 cells are unresolvable. That is a
     # constraint of the dependency, not a local preference, so it stays a
     # separate job until the reusable can express matrix exclusions
     # (netresearch/.github#287).
+    #
+    # The cell tests 8.1, not 8.0: Symfony 8.0 reached end of life in
+    # July 2026, and every symfony/http-foundation 8.0.x release is affected
+    # by PKSA-xmwy-rmx5-m7h4 (>=8.0.0,<8.1.0, fixed in 8.1.7), so Composer's
+    # advisory blocking leaves an 8.0.* cell with no installable set.
     symfony-8:
         uses: netresearch/.github/.github/workflows/php-ci.yml@main
         permissions:
             contents: read
         with:
             php-versions: '["8.4"]'
-            extra-matrix: '[{"symfony":"8.0.*"}]'
+            extra-matrix: '[{"symfony":"8.1.*"}]'
             symfony-require: MATRIX_SYMFONY
             phpstan-cmd: composer phpstan
             phpunit-cmd: composer test
